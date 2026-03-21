@@ -54,15 +54,24 @@
     const sdk = window.farcaster.FrameSDK;
 
     async function start() {
-        sdk.actions.ready();
+    try {
+        console.log("Démarrage du SDK...");
+        // On signale à Farcaster que la Frame est prête
+        await sdk.actions.ready();
+        
+        // On récupère les infos de l'utilisateur
         const context = await sdk.context;
         if (context && context.user) {
-            document.getElementById('userName').innerText = context.user.displayName || context.user.username;
+            document.getElementById('userName').textContent = context.user.displayName || context.user.username;
             document.getElementById('userImg').src = context.user.pfpUrl;
-            document.getElementById('userDays').innerText = Math.floor(Math.random() * 300) + 10;
         }
+    } catch (error) {
+        console.error("Erreur SDK:", error);
+        // Si ça rate, on met un message au lieu de laisser "Chargement..."
+        document.getElementById('userName').textContent = "Utilisateur Eagle-Pi";
     }
-
+}
+start();
     async function payUSDC() {
         try {
             // Commande de paiement via le SDK Frame v2
