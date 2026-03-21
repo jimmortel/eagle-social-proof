@@ -1,97 +1,58 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta name="fc:frame" content='{"version":"next","imageUrl":"https://eagle-social-proof.vercel.app/preview.png","button":{"title":"Lancer Eagle-Pi","action":{"type":"launch_frame","name":"Eagle-Pi","url":"https://eagle-social-proof.vercel.app/"}}}'>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eagle-Pi Social Proof</title>
-    <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk/dist/index.min.js"></script>
-    <style>
-        body { background: #020617; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        .card { 
-            width: 320px; border: 1px solid #1e293b; border-radius: 24px; padding: 30px;
-            background: linear-gradient(160deg, #0f172a 0%, #020617 100%); text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8); position: relative;
-        }
-        .card::before { content: ""; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; background: linear-gradient(45deg, #3b82f6, transparent, #3b82f6); border-radius: 26px; z-index: -1; opacity: 0.3; }
-        .avatar { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #3b82f6; margin-bottom: 15px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
-        .rank-label { color: #64748b; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 5px; }
-        .rank-name { color: #f8fafc; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; }
-        h2 { margin: 5px 0; font-size: 1.5rem; color: #f1f5f9; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 25px 0; }
-        .stat-box { background: rgba(30, 41, 59, 0.5); padding: 12px; border-radius: 12px; border: 1px solid #1e293b; }
-        .stat-val { display: block; font-size: 1.2rem; font-weight: 800; color: #3b82f6; }
-        .stat-lbl { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; }
-        button { 
-            background: #3b82f6; color: white; border: none; width: 100%; padding: 15px; 
-            border-radius: 12px; font-weight: 900; cursor: pointer; transition: 0.2s;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        button:hover { background: #2563eb; transform: translateY(-2px); }
-        .footer { margin-top: 25px; font-size: 0.65rem; color: #475569; letter-spacing: 4px; font-weight: bold; }
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <div class="rank-label">Eagle-Pi Protocol</div>
-    <img id="userImg" class="avatar" src="https://via.placeholder.com/100" alt="PFP">
-    <div class="rank-name" id="rankTitle">RANG : EAGLET 🦅</div>
-    <h2 id="userName">Chargement...</h2>
+    <meta name="fc:frame" content='{"version":"next","imageUrl":"https://eagle-social-proof.vercel.app/preview.png","button":{"title":"Lancer Eagle-Pi","action":{"type":"launch_frame","name":"Eagle-Pi","url":"https://eagle-social-proof.vercel.app/"}}}'>
     
-    <div class="stats-grid">
-        <div class="stat-box"><span class="stat-val" id="userDays">--</span><span class="stat-lbl">Jours FC</span></div>
-        <div class="stat-box"><span class="stat-val">GENESIS</span><span class="stat-lbl">Badge</span></div>
+    <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk/dist/index.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen p-4">
+
+    <div id="main-card" class="bg-slate-800 border-2 border-blue-500 rounded-3xl p-6 w-full max-w-md shadow-2xl text-center">
+        <h1 class="text-2xl font-bold mb-4 text-blue-400">🦅 Eagle-Pi Proof</h1>
+        
+        <div class="flex flex-col items-center gap-4 mb-6">
+            <img id="userImg" src="https://placehold.co/100x100?text=Eagle" class="w-24 h-24 rounded-full border-4 border-blue-500 shadow-lg">
+            <h2 id="userName" class="text-xl font-semibold text-white">Utilisateur Eagle-Pi</h2>
+        </div>
+
+        <p class="text-slate-400 text-sm mb-6">Paiement sécurisé de 1 USDC pour accès Sky Hunter.</p>
+
+        <button id="payButton" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform active:scale-95 shadow-lg">
+            🚀 Passer Sky Hunter (1 USDC)
+        </button>
     </div>
 
-    <button onclick="payUSDC()">Passer Sky Hunter (1 USDC)</button>
-    <div class="footer">EAGLE-PI SYSTEM</div>
-</div>
+    <script>
+        // Initialisation ultra-rapide
+        const sdk = window.frameSdk;
 
-<script>
-    const WALLET_RECEPTION = "GU5dNvMQKoUiVJvZ5HUgrv3CxtrR5ujxfHK2HPT6Z6bV"; // <--- TON ADRESSE ICI
-    const USDC_SOLANA = "EPjFW36v3qNSNRuv7P5B1GuqAbtWWxh4f97nzaxgSPT";
-    const sdk = window.farcaster.FrameSDK;
-
-    async function start() {
-    try {
-        console.log("Démarrage du SDK...");
-        // On signale à Farcaster que la Frame est prête
-        await sdk.actions.ready();
-        
-        // On récupère les infos de l'utilisateur
-        const context = await sdk.context;
-        if (context && context.user) {
-            document.getElementById('userName').textContent = context.user.displayName || context.user.username;
-            document.getElementById('userImg').src = context.user.pfpUrl;
-        }
-    } catch (error) {
-        console.error("Erreur SDK:", error);
-        // Si ça rate, on met un message au lieu de laisser "Chargement..."
-        document.getElementById('userName').textContent = "Utilisateur Eagle-Pi";
-    }
-}
-start();
-    async function payUSDC() {
-        try {
-            // Commande de paiement via le SDK Frame v2
-            await sdk.actions.sendTransaction({
-                chainId: "solana:mainnet",
-                method: "transfer",
-                params: {
-                    to: WALLET_RECEPTION,
-                    amount: "1000000", // 1 USDC = 1,000,000 micro-unités
-                    token: USDC_SOLANA
+        async function init() {
+            try {
+                // On prévient Farcaster qu'on est là
+                if (sdk && sdk.actions) {
+                    await sdk.actions.ready();
+                    const context = await sdk.context;
+                    if (context && context.user) {
+                        document.getElementById('userName').textContent = context.user.displayName || context.user.username;
+                        document.getElementById('userImg').src = context.user.pfpUrl;
+                    }
                 }
-            });
-            alert("Paiement réussi ! Bienvenue Sky Hunter.");
-            document.getElementById('rankTitle').innerText = "RANG : SKY HUNTER ⚡";
-            document.body.style.background = "#0f172a";
-        } catch (err) {
-            console.error(err);
+            } catch (e) {
+                console.log("Mode debug/web");
+            }
         }
-    }
-    start();
-</script>
+
+        // Action du bouton
+        document.getElementById('payButton').addEventListener('click', async () => {
+            alert("Initialisation du paiement Solana...");
+            // Ici on ajoutera la logique de transaction après avoir vu que la carte s'affiche
+        });
+
+        init();
+    </script>
 </body>
 </html>
