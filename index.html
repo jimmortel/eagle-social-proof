@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eagle-Pi Proof</title>
+    <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk/dist/index.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #000; color: white; font-family: sans-serif; }
+        .eagle-card { background: linear-gradient(135deg, #1e3a8a 0%, #000000 100%); border: 1px solid #3b82f6; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="eagle-card w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl">
+        <div class="flex justify-center mb-4">
+            <div class="bg-blue-500 p-3 rounded-full shadow-lg">
+                <span class="text-3xl">🦅</span>
+            </div>
+        </div>
+        
+        <h1 class="text-2xl font-bold mb-2">Eagle-Pi Proof</h1>
+        <p class="text-blue-300 text-sm mb-6">Système de Certification Sociale</p>
+
+        <div id="user-info" class="mb-6">
+            <p class="text-gray-400">En attente de connexion...</p>
+        </div>
+
+        <button id="pay-button" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform active:scale-95 shadow-lg mb-3">
+            🚀 Passer Sky Hunter (1 USDC)
+        </button>
+        
+        <p class="text-xs text-gray-500">Frais : 0.001 SOL | Slippage : 10%</p>
+    </div>
+
+    <script>
+        const sdk = window.farcaster?.FrameSDK;
+
+        async function init() {
+            if (sdk) {
+                // Indique à Warpcast que l'app est prête
+                sdk.actions.ready();
+
+                // Récupération du nom de l'utilisateur
+                const context = await sdk.context;
+                if (context?.user) {
+                    document.getElementById('user-info').innerHTML = `
+                        <p class="text-white font-semibold">Bienvenue, ${context.user.displayName}</p>
+                        <p class="text-gray-500 text-xs">FID: ${context.user.fid}</p>
+                    `;
+                }
+            }
+        }
+
+        document.getElementById('pay-button').addEventListener('click', async () => {
+            try {
+                // Paramètres de la transaction Solana
+                // On envoie 1 USDC vers ton adresse
+                const txParams = {
+                    chainId: "solana:5eykt4UsFvXYqx2bK7W8vwSmdA26J5ST", // Mainnet
+                    method: "eth_sendTransaction", // Standard Farcaster pour Solana
+                    params: {
+                        to: "C6Z5v59B8BfNq3p1y9j9j9j9j9j9j9j9j9j9S7Uv", // Ton adresse
+                        value: "1000000", // 1 USDC (6 décimales)
+                        data: "eagle-pi-upgrade",
+                        priorityFee: 1000000, // Tes 0.001 SOL de frais
+                    }
+                };
+
+                const result = await sdk.actions.sendTransaction(txParams);
+                alert("Transaction envoyée !");
+            } catch (error) {
+                console.error("Erreur:", error);
+                alert("Erreur de transaction ou annulation.");
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>
