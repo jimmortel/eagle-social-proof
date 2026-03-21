@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eagle-Pi Social Proof</title>
+    <meta name="fc:frame" content='{"version":"next","imageUrl":"https://eagle-social-proof.vercel.app/preview.png","button":{"title":"Lancer Eagle-Pi","action":{"type":"launch_frame","name":"Eagle-Pi","url":"https://eagle-social-proof.vercel.app/"}}}'>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk/dist/index.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen p-4">
+
+    <div id="main-card" class="bg-slate-800 border-2 border-blue-500 rounded-3xl p-6 w-full max-w-md shadow-2xl text-center">
+        <h1 class="text-2xl font-bold mb-4 text-blue-400">🦅 Eagle-Pi Proof</h1>
+        
+        <div class="flex flex-col items-center gap-4 mb-6">
+            <img id="userImg" src="https://placehold.co/100x100?text=Eagle" class="w-24 h-24 rounded-full border-4 border-blue-500 shadow-lg">
+            <h2 id="userName" class="text-xl font-semibold text-white">Utilisateur Eagle-Pi</h2>
+        </div>
+
+        <p class="text-slate-400 text-sm mb-6">Paiement sécurisé de 1 USDC pour accès Sky Hunter.</p>
+
+        <button id="payButton" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform active:scale-95 shadow-lg">
+            🚀 Passer Sky Hunter (1 USDC)
+        </button>
+    </div>
+
+    const sdk = window.frameSdk;
+
+        async function init() {
+            try {
+                if (sdk && sdk.actions) {
+                    await sdk.actions.ready();
+                    const context = await sdk.context;
+                    if (context && context.user) {
+                        document.getElementById('userName').textContent = context.user.displayName || context.user.username;
+                        document.getElementById('userImg').src = context.user.pfpUrl;
+                    }
+                }
+            } catch (e) { console.log("Mode web"); }
+        }
+
+        document.getElementById('payButton').addEventListener('click', async () => {
+            try {
+                // On prévient l'utilisateur
+                console.log("Demande de transaction Solana...");
+                
+                // Appel au SDK pour déclencher le paiement de 1 USDC (1 000 000 unités)
+                await sdk.actions.ethAndSolanaTransaction({
+                    chainId: "solana:5eykt4UsFvXYfy2khWv7iaM6fkm2o59x", // Mainnet Solana
+                    method: "solana_signAndSendTransaction",
+                    params: {
+                        instructions: [
+                            {
+                                programId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA", // Programme Token (USDC)
+                                data: "3", // Transfer instruction
+                                keys: [
+                                    { pubkey: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", isSigner: false, isWritable: true }, // USDC Mint
+                                    { pubkey: "C6Z5HqE17u4D3iBwLzW5LzW5LzW5LzW5LzW5S7Uv", isSigner: false, isWritable: true }  // TON WALLET
+                                ]
+                            }
+                        ]
+                    }
+                });
+            } catch (error) {
+                console.error("Erreur de transaction :", error);
+                alert("Transaction annulée ou erreur de connexion au wallet.");
+            }
+        });
+
+        init();
+</body>
+</html>
