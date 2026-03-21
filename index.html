@@ -6,77 +6,79 @@
     <title>Eagle-Pi Proof</title>
     <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk/dist/index.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #000; color: white; font-family: sans-serif; }
-        .eagle-card { background: linear-gradient(135deg, #1e3a8a 0%, #000000 100%); border: 1px solid #3b82f6; }
-    </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-4">
+<body class="bg-black text-white flex flex-col items-center justify-center min-h-screen p-4">
 
-    <div class="eagle-card w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl">
-        <div class="flex justify-center mb-4">
-            <div class="bg-blue-500 p-3 rounded-full shadow-lg">
-                <span class="text-3xl">🦅</span>
-            </div>
+    <div id="main-card" class="bg-gradient-to-br from-blue-900 to-black w-full max-w-sm rounded-3xl p-6 text-center border border-blue-500 shadow-2xl">
+        <div class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <span class="text-3xl">🦅</span>
         </div>
         
         <h1 class="text-2xl font-bold mb-2">Eagle-Pi Proof</h1>
-        <p class="text-blue-300 text-sm mb-6">Système de Certification Sociale</p>
-
-        <div id="user-info" class="mb-6">
-            <p class="text-gray-400">En attente de connexion...</p>
+        
+        <div id="status-area" class="my-6 p-4 bg-black/40 rounded-xl border border-white/10">
+            <p id="user-name" class="text-lg font-semibold text-blue-300">Initialisation...</p>
+            <p id="user-fid" class="text-xs text-gray-500 mt-1"></p>
         </div>
 
-        <button id="pay-button" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform active:scale-95 shadow-lg mb-3">
+        <button id="pay-button" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50">
             🚀 Passer Sky Hunter (1 USDC)
         </button>
         
-        <p class="text-xs text-gray-500">Frais : 0.001 SOL | Slippage : 10%</p>
+        <p class="text-[10px] text-gray-500 mt-4 uppercase tracking-widest">Solana Mainnet | 0.001 SOL Fee</p>
     </div>
 
     <script>
-        const sdk = window.farcaster?.FrameSDK;
+        // On attend que le DOM soit chargé
+        window.addEventListener('load', async () => {
+            const statusText = document.getElementById('user-name');
+            const fidText = document.getElementById('user-fid');
+            const sdk = window.farcaster?.FrameSDK;
 
-        async function init() {
-            if (sdk) {
-                // Indique à Warpcast que l'app est prête
+            if (!sdk) {
+                statusText.innerText = "⚠️ SDK Non Détecté";
+                statusText.classList.add('text-red-400');
+                return;
+            }
+
+            try {
+                // On signale au SDK qu'on est prêt
                 sdk.actions.ready();
 
-                // Récupération du nom de l'utilisateur
+                // On récupère le contexte (pseudo, FID, etc.)
                 const context = await sdk.context;
-                if (context?.user) {
-                    document.getElementById('user-info').innerHTML = `
-                        <p class="text-white font-semibold">Bienvenue, ${context.user.displayName}</p>
-                        <p class="text-gray-500 text-xs">FID: ${context.user.fid}</p>
-                    `;
+                
+                if (context && context.user) {
+                    statusText.innerText = "Bienvenue, " + context.user.displayName;
+                    fidText.innerText = "FID: " + context.user.fid;
+                    statusText.classList.replace('text-blue-300', 'text-green-400');
+                } else {
+                    statusText.innerText = "Connecté (Hors Warpcast)";
                 }
-            }
-        }
-
-        document.getElementById('pay-button').addEventListener('click', async () => {
-            try {
-                // Paramètres de la transaction Solana
-                // On envoie 1 USDC vers ton adresse
-                const txParams = {
-                    chainId: "solana:5eykt4UsFvXYqx2bK7W8vwSmdA26J5ST", // Mainnet
-                    method: "eth_sendTransaction", // Standard Farcaster pour Solana
-                    params: {
-                        to: "C6Z5v59B8BfNq3p1y9j9j9j9j9j9j9j9j9j9S7Uv", // Ton adresse
-                        value: "1000000", // 1 USDC (6 décimales)
-                        data: "eagle-pi-upgrade",
-                        priorityFee: 1000000, // Tes 0.001 SOL de frais
-                    }
-                };
-
-                const result = await sdk.actions.sendTransaction(txParams);
-                alert("Transaction envoyée !");
-            } catch (error) {
-                console.error("Erreur:", error);
-                alert("Erreur de transaction ou annulation.");
+            } catch (err) {
+                statusText.innerText = "Erreur de connexion";
+                console.error(err);
             }
         });
 
-        init();
+        // Gestion du bouton de paiement
+        document.getElementById('pay-button').addEventListener('click', async () => {
+            const sdk = window.farcaster?.FrameSDK;
+            if (!sdk) return alert("Ouvre l'app dans Warpcast pour payer");
+
+            try {
+                await sdk.actions.sendTransaction({
+                    chainId: "solana:5eykt4UsFvXYqx2bK7W8vwSmdA26J5ST",
+                    method: "eth_sendTransaction",
+                    params: {
+                        to: "C6Z5v59B8BfNq3p1y9j9j9j9j9j9j9j9j9j9S7Uv",
+                        value: "1000000", // 1 USDC
+                    }
+                });
+            } catch (e) {
+                console.log("Transaction annulée ou erreur");
+            }
+        });
     </script>
 </body>
 </html>
