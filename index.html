@@ -26,13 +26,10 @@
         </button>
     </div>
 
-    <script>
-        // Initialisation ultra-rapide
-        const sdk = window.frameSdk;
+    const sdk = window.frameSdk;
 
         async function init() {
             try {
-                // On prévient Farcaster qu'on est là
                 if (sdk && sdk.actions) {
                     await sdk.actions.ready();
                     const context = await sdk.context;
@@ -41,18 +38,37 @@
                         document.getElementById('userImg').src = context.user.pfpUrl;
                     }
                 }
-            } catch (e) {
-                console.log("Mode debug/web");
-            }
+            } catch (e) { console.log("Mode web"); }
         }
 
-        // Action du bouton
         document.getElementById('payButton').addEventListener('click', async () => {
-            alert("Initialisation du paiement Solana...");
-            // Ici on ajoutera la logique de transaction après avoir vu que la carte s'affiche
+            try {
+                // On prévient l'utilisateur
+                console.log("Demande de transaction Solana...");
+                
+                // Appel au SDK pour déclencher le paiement de 1 USDC (1 000 000 unités)
+                await sdk.actions.ethAndSolanaTransaction({
+                    chainId: "solana:5eykt4UsFvXYfy2khWv7iaM6fkm2o59x", // Mainnet Solana
+                    method: "solana_signAndSendTransaction",
+                    params: {
+                        instructions: [
+                            {
+                                programId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA", // Programme Token (USDC)
+                                data: "3", // Transfer instruction
+                                keys: [
+                                    { pubkey: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", isSigner: false, isWritable: true }, // USDC Mint
+                                    { pubkey: "C6Z5HqE17u4D3iBwLzW5LzW5LzW5LzW5LzW5S7Uv", isSigner: false, isWritable: true }  // TON WALLET
+                                ]
+                            }
+                        ]
+                    }
+                });
+            } catch (error) {
+                console.error("Erreur de transaction :", error);
+                alert("Transaction annulée ou erreur de connexion au wallet.");
+            }
         });
 
         init();
-    </script>
 </body>
 </html>
