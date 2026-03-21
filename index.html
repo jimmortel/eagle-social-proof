@@ -33,7 +33,7 @@
         window.addEventListener('load', async () => {
             const statusText = document.getElementById('user-name');
             const fidText = document.getElementById('user-fid');
-            const sdk = window.farcaster?.FrameSDK;
+            const sdk = window.farcaster?.FrameSDK || window.parent?.farcaster?.FrameSDK;
 
             if (!sdk) {
                 statusText.innerText = "⚠️ SDK Non Détecté";
